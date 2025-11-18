@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 int main() {
-    FILE *prob = fopen("\doc\problem.txt", "r");
-    FILE *soln = fopen("\doc\solution.txt", "r");
+    FILE *prob = fopen("../doc/problem.txt", "r");
+    FILE *soln = fopen("../doc/solution.txt", "r");
 
     if (!prob || !soln) {
         printf("Error opening files.\n");

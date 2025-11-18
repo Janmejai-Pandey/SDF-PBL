@@ -305,8 +305,8 @@ int main()
         mode="w";
     }
 
-    prob = fopen("problem.txt", mode);
-    soln = fopen("solution.txt", mode);
+    prob = fopen("../doc/problem.txt", mode);
+    soln = fopen("../doc/solution.txt", mode);
 
     sudokuGenerator(puzzle, k);
     copyGrid(puzzle, solution);
