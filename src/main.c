@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "hpdf.h"
 
 void printGridFile(int grid[9][9],FILE *file)
 {
@@ -266,6 +267,48 @@ void sudokuGenerator(int grid[9][9], int k)
     removeKDigits(grid, k);
 }
 
+void printPdf()
+{
+    FILE *prob = fopen("../doc/problem.txt", "r");
+    FILE *soln = fopen("../doc/solution.txt", "r");
+
+    HPDF_Doc pdf = HPDF_New(NULL, NULL);
+    if (!pdf) {
+        printf("Failed to create PDF object\n");
+        return;
+    }
+
+    HPDF_Page page = HPDF_AddPage(pdf);
+    HPDF_Page_SetSize(page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
+
+    HPDF_Font font = HPDF_GetFont(pdf, "Consolas", NULL);
+    HPDF_Page_SetFontAndSize(page, font, 12);
+
+    // Add content from problem and solution files to the PDF
+    HPDF_Page_BeginText(page);
+    HPDF_Page_TextOut(page, 50, 800, "Sudoku Problem:");
+    char line[256];
+    int y = 780;
+    while (fgets(line, sizeof(line), prob)) {
+        HPDF_Page_TextOut(page, 50, y, line);
+        y -= 15; // Move down for next line
+    }
+    y -= 30; // Extra space before solution
+    HPDF_Page_TextOut(page, 50, y, "Sudoku Solution:");
+    y -= 20;
+    while (fgets(line, sizeof(line), soln)) {
+        HPDF_Page_TextOut(page, 50, y, line);
+        y -= 15; // Move down for next line
+    }
+    HPDF_Page_EndText(page);
+
+    const char *filename = "sudoku.pdf";
+    HPDF_SaveToFile(pdf, filename);
+    HPDF_Free(pdf);
+
+    printf("PDF file '%s' created successfully.\n", filename);
+}
+
 int main()
 {
     srand(time(NULL));
@@ -325,5 +368,9 @@ int main()
     {
         printf("No solution exists\n");
     }
+    fclose(prob);
+    fclose(soln);
+
+    printPdf();
     return 0;
 }
