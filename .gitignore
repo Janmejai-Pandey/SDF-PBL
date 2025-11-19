@@ -1,2 +1,2 @@
-src/solvedChecker.exe
-src/main.exe
+*.exe
+/.vscode
