@@ -414,16 +414,16 @@ void draw_grid_on_page(HPDF_Doc pdf, HPDF_Page page, int grid[9][9], int x, int 
 // Main PDF function: reads all puzzles & solutions and writes grids with auto page breaks
 void printPdf()
 {
-    FILE *prob = fopen("../doc/problem.txt", "r");
-    FILE *soln = fopen("../doc/solution.txt", "r");
+    FILE *prob = fopen("doc/problem.txt", "r");
+    FILE *soln = fopen("doc/solution.txt", "r");
 
     if (!prob) {
-        printf("ERROR: cannot open ../doc/problem.txt\n");
+        printf("ERROR: cannot open doc/problem.txt\n");
         if (soln) fclose(soln);
         return;
     }
     if (!soln) {
-        printf("ERROR: cannot open ../doc/solution.txt\n");
+        printf("ERROR: cannot open doc/solution.txt\n");
         fclose(prob);
         return;
     }
@@ -498,7 +498,7 @@ void printPdf()
     }
 
     // Save file (relative to current working directory)
-    const char *outname = "../doc/sudoku.pdf";
+    const char *outname = "doc/sudoku.pdf";
     HPDF_STATUS st = HPDF_SaveToFile(pdf, outname);
     if (st != HPDF_OK) {
         printf("ERROR: HPDF_SaveToFile failed with status %d\n", (int)st);
@@ -587,8 +587,8 @@ int main()
         int n = noOfPuzzles();
 
         // open files - overwrite existing
-        FILE *prob = fopen("../doc/problem.txt", "w");
-        FILE *soln = fopen("../doc/solution.txt", "w");
+        FILE *prob = fopen("doc/problem.txt", "w");
+        FILE *soln = fopen("doc/solution.txt", "w");
         if (!prob || !soln)
         {
             printf("Failed to open output files in doc/.\n");
@@ -637,11 +637,11 @@ int main()
     }
     else if (m == 2)
     {
-        // Solve a puzzle from ../doc/problem.txt and write solution to ../doc/solution.txt
-        FILE *prob = fopen("../doc/problem.txt", "r");
+        // Solve a puzzle from doc/problem.txt and write solution to doc/solution.txt
+        FILE *prob = fopen("doc/problem.txt", "r");
         if (!prob)
         {
-            printf("Failed to open ../doc/problem.txt\n");
+            printf("Failed to open doc/problem.txt\n");
             return 1;
         }
 
@@ -691,16 +691,16 @@ int main()
         }
 
         // write solution to file
-        FILE *soln = fopen("../doc/solution.txt", "w");
+        FILE *soln = fopen("doc/solution.txt", "w");
         if (!soln)
         {
-            printf("Failed to open ../doc/solution.txt for writing.\n");
+            printf("Failed to open doc/solution.txt for writing.\n");
             return 1;
         }
         printGridFile(puzzle, soln);
         fclose(soln);
 
-        printf("Solved puzzle and wrote solution to ../doc/solution.txt\n");
+        printf("Solved puzzle and wrote solution to doc/solution.txt\n");
     }
     else
     {
