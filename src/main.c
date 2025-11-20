@@ -3,7 +3,7 @@
 #include <time.h>
 #include "hpdf.h"
 
-void printGridFile(int grid[9][9],FILE *file)
+void printGridFile(int grid[9][9], FILE *file)
 {
     for (int row = 0; row < 9; row++)
     {
@@ -11,25 +11,25 @@ void printGridFile(int grid[9][9],FILE *file)
         {
             if (grid[row][col] == 0)
             {
-                fprintf(file,"_ ");
+                fprintf(file, "_ ");
             }
             else
             {
-                fprintf(file,"%d ", grid[row][col]);
+                fprintf(file, "%d ", grid[row][col]);
             }
 
             if (col % 3 == 2 && col != 8)
             {
-                fprintf(file,"| ");
+                fprintf(file, "| ");
             }
         }
-        fprintf(file,"\n");
+        fprintf(file, "\n");
         if (row % 3 == 2 && row != 8)
         {
-            fprintf(file,"------|-------|------\n");
+            fprintf(file, "------|-------|------\n");
         }
     }
-    fprintf(file,"\n\n");
+    fprintf(file, "\n\n");
 }
 
 void printGrid(int grid[9][9])
@@ -218,7 +218,7 @@ int fillRemaining(int grid[9][9], int i, int j)
             {
                 return 1;
             }
-            
+
             // Backtracking
             grid[i][j] = 0;
         }
@@ -273,7 +273,8 @@ void printPdf()
     FILE *soln = fopen("../doc/solution.txt", "r");
 
     HPDF_Doc pdf = HPDF_New(NULL, NULL);
-    if (!pdf) {
+    if (!pdf)
+    {
         printf("Failed to create PDF object\n");
         return;
     }
@@ -281,7 +282,7 @@ void printPdf()
     HPDF_Page page = HPDF_AddPage(pdf);
     HPDF_Page_SetSize(page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
 
-    HPDF_Font font = HPDF_GetFont(pdf, "Consolas", NULL);
+    HPDF_Font font = HPDF_GetFont(pdf, "Courier", NULL);
     HPDF_Page_SetFontAndSize(page, font, 12);
 
     // Add content from problem and solution files to the PDF
@@ -289,14 +290,16 @@ void printPdf()
     HPDF_Page_TextOut(page, 50, 800, "Sudoku Problem:");
     char line[256];
     int y = 780;
-    while (fgets(line, sizeof(line), prob)) {
+    while (fgets(line, sizeof(line), prob))
+    {
         HPDF_Page_TextOut(page, 50, y, line);
         y -= 15; // Move down for next line
     }
     y -= 30; // Extra space before solution
     HPDF_Page_TextOut(page, 50, y, "Sudoku Solution:");
     y -= 20;
-    while (fgets(line, sizeof(line), soln)) {
+    while (fgets(line, sizeof(line), soln))
+    {
         HPDF_Page_TextOut(page, 50, y, line);
         y -= 15; // Move down for next line
     }
@@ -309,16 +312,20 @@ void printPdf()
     printf("PDF file '%s' created successfully.\n", filename);
 }
 
-int main()
+int mode()
 {
-    srand(time(NULL));
-
-    int puzzle[9][9], solution[9][9];
-    int k = 30;
-
-    printf("Enter a difficulty level - \n1. Easy (30 empty cells)\n2. Medium (45 empty cells)\n3. Hard (60 empty cells)\n");
+    printf("1: Generate Sudoku Puzzle\n2: Solve Sudoku Puzzle\n");
     int choice;
     scanf("%d", &choice);
+    return choice;
+}
+
+int difficulty()
+{
+    printf("Select Difficulty Level:\n1. Easy\n2. Medium\n3. Hard\n");
+    int choice;
+    scanf("%d", &choice);
+    int k;
     switch (choice)
     {
     case 1:
@@ -334,43 +341,184 @@ int main()
         printf("Invalid choice, defaulting to Medium difficulty.\n");
         k = 45;
     }
+    return k;
+}
 
-    FILE *prob;
-    FILE *soln;
+int printMode()
+{
+    printf("Select Print Mode:\n1. Console\n2. File(Default)\n");
+    int choice;
+    scanf("%d", &choice);
+    return choice;
+}
 
-    printf("Do you want to append the file(Y/N)?(Y is default)");
-    char choiceFile;
-    getchar();
-    scanf("%c",&choiceFile);
-
-    char* mode="a";
-    if(choiceFile=='N'){
-        mode="w";
-    }
-
-    prob = fopen("../doc/problem.txt", mode);
-    soln = fopen("../doc/solution.txt", mode);
-
-    sudokuGenerator(puzzle, k);
-    copyGrid(puzzle, solution);
-
-    printf("Generated Sudoku Puzzle:\n");
-    printGrid(puzzle);
-    printGridFile(puzzle,prob);
-
-    if (solveSudoku(solution))
+void isPDF()
+{
+    printf("Do you want to generate a PDF file? (1 for Yes, 0 for No): ");
+    int choice;
+    scanf("%d", &choice);
+    if (choice)
     {
-        printf("\nSolution:\n");
-        printGrid(solution);
-        printGridFile(solution,soln);
+        printPdf();
+    }
+}
+
+int noOfPuzzles()
+{
+    printf("Enter the number of puzzles to generate: ");
+    int choice;
+    scanf("%d", &choice);
+    return choice;
+}
+
+void writeFile(int puzzle[9][9], int solution[9][9], FILE *prob, FILE *soln)
+{
+    // write puzzle to prob and solution to soln
+    if (!prob || !soln)
+        return;
+
+    printGridFile(puzzle, prob);
+    printGridFile(solution, soln);
+}
+
+int main()
+{
+    srand(time(NULL));
+
+    int puzzle[9][9];
+    int solution[9][9];
+
+    int m = mode();
+
+    if (m == 1)
+    {
+        int pm = printMode();
+        int pdfChoice;
+        printf("Do you want to generate a PDF file? (1 for Yes, 0 for No): ");
+        scanf("%d", &pdfChoice);
+        int n = noOfPuzzles();
+
+        // open files - overwrite existing
+        FILE *prob = fopen("../doc/problem.txt", "w");
+        FILE *soln = fopen("../doc/solution.txt", "w");
+        if (!prob || !soln)
+        {
+            printf("Failed to open output files in doc/.\n");
+            if (prob)
+                fclose(prob);
+            if (soln)
+                fclose(soln);
+            return 1;
+        }
+
+        for (int t = 0; t < n; t++)
+        {
+            // generate
+            sudokuGenerator(puzzle, difficulty());
+
+            // copy and solve for solution
+            copyGrid(puzzle, solution);
+            if (!solveSudoku(solution))
+            {
+                // in the unlikely event the solver fails, retry this puzzle
+                t--;
+                continue;
+            }
+
+            if (pm == 1)
+            {
+                printf("--- Puzzle %d ---\n", t + 1);
+                printGrid(puzzle);
+                printf("\n--- Solution %d ---\n", t + 1);
+                printGrid(solution);
+                printf("\n");
+            }
+            else
+            {
+                writeFile(puzzle, solution, prob, soln);
+            }
+        }
+
+        fclose(prob);
+        fclose(soln);
+
+        if (pm!=1&&pdfChoice)
+        {
+            printPdf();
+        }
+    }
+    else if (m == 2)
+    {
+        // Solve a puzzle from ../doc/problem.txt and write solution to ../doc/solution.txt
+        FILE *prob = fopen("../doc/problem.txt", "r");
+        if (!prob)
+        {
+            printf("Failed to open ../doc/problem.txt\n");
+            return 1;
+        }
+
+        // read first puzzle from file into grid; we expect numbers and '_' for blanks
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                int val = 0;
+                // read next non-space, non-separator char(s)
+                int c = getc(prob);
+                while (c != EOF && (c == ' ' || c == '\n' || c == '|' || c == '-' ))
+                    c = getc(prob);
+                if (c == EOF)
+                {
+                    fclose(prob);
+                    printf("Unexpected end of file while reading puzzle.\n");
+                    return 1;
+                }
+
+                if (c == '_')
+                {
+                    val = 0;
+                }
+                else if (c >= '0' && c <= '9')
+                {
+                    // handle possibly two-digit reads but sudoku digits are single
+                    val = c - '0';
+                }
+                else
+                {
+                    // unknown char, treat as empty
+                    val = 0;
+                }
+
+                puzzle[i][j] = val;
+            }
+        }
+
+        fclose(prob);
+
+        // solve
+        if (!solveSudoku(puzzle))
+        {
+            printf("No solution exists for the provided puzzle.\n");
+            return 1;
+        }
+
+        // write solution to file
+        FILE *soln = fopen("../doc/solution.txt", "w");
+        if (!soln)
+        {
+            printf("Failed to open ../doc/solution.txt for writing.\n");
+            return 1;
+        }
+        printGridFile(puzzle, soln);
+        fclose(soln);
+
+        printf("Solved puzzle and wrote solution to ../doc/solution.txt\n");
     }
     else
     {
-        printf("No solution exists\n");
+        printf("Invalid mode selected. Exiting.\n");
+        return 1;
     }
-    fclose(prob);
-    fclose(soln);
 
-    printPdf();
     return 0;
 }
