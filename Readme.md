@@ -88,7 +88,7 @@ cd SDF-PBL
 
 ### **3. Compile:
 
-````bash
+```bash
 gcc src/main.c -lhpdf -lz -lpng -o build/sudoku
 ```
 ---
